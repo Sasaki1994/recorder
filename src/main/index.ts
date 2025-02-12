@@ -1,12 +1,24 @@
-import { app, shell, BrowserWindow, ipcMain, session, desktopCapturer } from 'electron'
+import { app, shell, BrowserWindow, session, ipcMain, desktopCapturer } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
-function createWindow(): void {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
+const config = {
+  mainWindow: {
     width: 1280,
-    height: 720,
+    height: 720
+  },
+  sideWidth: 80
+}
+
+function createWindow(): void {
+  const mainWindow = createMainWindow()
+  setupTimeshiftWindow(mainWindow)
+}
+
+function createMainWindow(): BrowserWindow {
+  const mainWindow = new BrowserWindow({
+    width: config.mainWindow.width,
+    height: config.mainWindow.height,
     show: false,
     autoHideMenuBar: true,
     webPreferences: {
@@ -24,15 +36,21 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
+  mainWindow.webContents.on('did-finish-load', () => {
+    mainWindow.webContents.send('config', config)
+  })
+
+  mainWindow.on('close', () => {
+    // メインウィンドウが閉じられたときに関連するウィンドウも閉じる
+    app.quit()
+  })
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
-  // タイムシフトのためのデスクトップキャプチャリクエストハンドラ
   session.defaultSession.setDisplayMediaRequestHandler((_request, callback) => {
     desktopCapturer.getSources({ types: ['window'] }).then((sources) => {
       sources.forEach((source) => {
@@ -43,24 +61,76 @@ function createWindow(): void {
     })
   })
 
-  // タイムシフトウィンドウの作成イベント受信
-  ipcMain.handle('open-timeshift', () => {
-    // 子ウィンドウを作成
-    const subWindow = new BrowserWindow({
-      title: 'Timeshift Window',
-      webPreferences: {
-        preload: join(__dirname, '../preload/index.js'),
-        sandbox: false
-      },
-      width: 1280,
-      height: 720
+  return mainWindow
+}
+
+let timeshiftWindowId: number | null = null
+
+function setupTimeshiftWindow(mainWindow: BrowserWindow): void {
+  ipcMain.handle('open-timeshift', (_event, init) => {
+    if (timeshiftWindowId) return
+    const subWindow = createTimeshiftWindow(mainWindow, init)
+    timeshiftWindowId = subWindow.id
+    subWindow.on('closed', () => {
+      timeshiftWindowId = null
+      mainWindow.webContents.send('timeshift-state', 'hidden')
     })
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-      subWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/timeshift.html`)
+    if (init === 'visible') {
+      mainWindow.webContents.send('timeshift-state', 'visible')
     } else {
-      subWindow.loadFile(join(__dirname, '../renderer/timeshift.html'))
+      mainWindow.webContents.send('timeshift-state', 'hidden')
     }
   })
+
+  ipcMain.handle('switch-timeshift', () => {
+    if (!timeshiftWindowId) return
+    const subWindow = BrowserWindow.fromId(timeshiftWindowId)
+    if (subWindow) {
+      if (subWindow.isVisible()) {
+        subWindow.hide()
+        mainWindow.webContents.send('timeshift-state', 'hidden')
+      } else {
+        subWindow.show()
+        mainWindow.webContents.send('timeshift-state', 'visible')
+      }
+    }
+  })
+}
+
+function createTimeshiftWindow(mainWindow: BrowserWindow, init: string): BrowserWindow {
+  const subWindow = new BrowserWindow({
+    title: 'Timeshift Window',
+    alwaysOnTop: true,
+    titleBarStyle: 'hiddenInset',
+    frame: false,
+    thickFrame: false,
+    hasShadow: false,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    focusable: false,
+    show: init === 'visible' ? true : false,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    },
+    width: mainWindow.getSize()[0] - config.sideWidth,
+    height: mainWindow.getSize()[1],
+    x: mainWindow.getPosition()[0] + config.sideWidth,
+    y: mainWindow.getPosition()[1]
+  })
+
+  subWindow.webContents.on('did-finish-load', () => {
+    subWindow.webContents.send('config', config)
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    subWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/timeshift.html`)
+  } else {
+    subWindow.loadFile(join(__dirname, '../renderer/timeshift.html'))
+  }
+
+  return subWindow
 }
 
 // This method will be called when Electron has finished

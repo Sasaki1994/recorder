@@ -1,34 +1,26 @@
 import { useState } from 'react'
-import Camera from './components/Camera'
-import testVideo from './assets/test.mov'
+import SideMenu from './components/SideMenu'
+import CameraCanvas from './components/CameraCanvas'
 
 function App(): JSX.Element {
-  const [zIndexes, setZindexes] = useState<number[]>([0, 0, 0])
-  const takeTop = (index: number): void => {
-    const newZIndexes = [...zIndexes]
-    newZIndexes[index] = Math.max(...zIndexes) + 1
-    setZindexes(newZIndexes)
-  }
+  const [timeshiftState, setTimeshiftState] = useState<string>('')
+  const [width, setWidth] = useState<number | undefined>()
+
+  window.api.openTimeshift()
+
+  window.api.recieveTimeshiftState((_event, state) => {
+    setTimeshiftState(state)
+  })
+
+  window.api.recieveConfig((_event, config) => {
+    setWidth(config.sideWidth)
+  })
 
   return (
-    <>
-      <button
-        style={{ position: 'absolute', top: 0, left: 0 }}
-        onClick={() => {
-          window.api.openTimeshift()
-        }}
-      >
-        Open!!
-      </button>
-      <Camera
-        videoSrc={testVideo}
-        backgroundColor="rgb(255, 126, 126)"
-        zIndex={zIndexes[0]}
-        onDragStart={() => {
-          takeTop(0)
-        }}
-      />
-    </>
+    <div>
+      <SideMenu width={width} timeshiftState={timeshiftState} />
+      <CameraCanvas />
+    </div>
   )
 }
 

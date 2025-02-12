@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useInterval } from 'react-use'
 
 function Timeshift(): JSX.Element {
@@ -6,17 +6,20 @@ function Timeshift(): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const dImagesRef = useRef<ImageData[]>([])
   const delayedCanvasRef = useRef<HTMLCanvasElement>(null)
+  const [config, setConfig] = useState<Config | undefined>()
   const delayTime = 5 // seconds
   const frameRate = 30 // fps
   const savedImageCount = delayTime * frameRate
 
-  useEffect(() => {
+  window.api.recieveConfig((_event, config) => {
+    setConfig(config)
+
     navigator.mediaDevices
       .getDisplayMedia({
         audio: false,
         video: {
-          width: 1280,
-          height: 720,
+          width: config?.mainWindow.width,
+          height: config?.mainWindow.height,
           frameRate
         }
       })
@@ -27,15 +30,21 @@ function Timeshift(): JSX.Element {
         }
       })
       .catch((e) => console.log(e))
-  }, [])
+  })
 
   useInterval(() => {
-    if (captureRef.current && canvasRef.current) {
+    if (captureRef.current && canvasRef.current && config) {
       canvasRef.current.width = captureRef.current.videoWidth
       canvasRef.current.height = captureRef.current.videoHeight
       const ctx = canvasRef.current.getContext('2d')
       if (ctx) {
-        ctx.drawImage(captureRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height)
+        ctx.drawImage(
+          captureRef.current,
+          (-1 * config?.sideWidth) / 2,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        )
         dImagesRef.current = [
           ...dImagesRef.current,
           ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height)
@@ -56,7 +65,14 @@ function Timeshift(): JSX.Element {
 
   return (
     <>
-      <video style={{ display: 'none', width: 1280, height: 720 }} ref={captureRef} />
+      <video
+        style={{
+          display: 'none',
+          width: config?.mainWindow.width,
+          height: config?.mainWindow.height
+        }}
+        ref={captureRef}
+      />
       <canvas style={{ display: 'none' }} ref={canvasRef} />
       <canvas style={{ display: '' }} ref={delayedCanvasRef} />
     </>

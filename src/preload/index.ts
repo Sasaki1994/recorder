@@ -3,7 +3,11 @@ import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
 const api = {
-  openTimeshift: (): Promise<void> => ipcRenderer.invoke('open-timeshift')
+  openTimeshift: (init?: string): Promise<void> => ipcRenderer.invoke('open-timeshift', init),
+  switchTimeshift: (): Promise<void> => ipcRenderer.invoke('switch-timeshift'),
+  recieveConfig: (listener): Electron.IpcRenderer => ipcRenderer.on('config', listener),
+  recieveTimeshiftState: (listener): Electron.IpcRenderer =>
+    ipcRenderer.on('timeshift-state', listener)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
