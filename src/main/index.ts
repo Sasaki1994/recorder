@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, session, desktopCapturer } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
@@ -31,6 +31,36 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  // タイムシフトのためのデスクトップキャプチャリクエストハンドラ
+  session.defaultSession.setDisplayMediaRequestHandler((_request, callback) => {
+    desktopCapturer.getSources({ types: ['window'] }).then((sources) => {
+      sources.forEach((source) => {
+        if (source.name === mainWindow.getTitle()) {
+          callback({ video: source, audio: 'loopback' })
+        }
+      })
+    })
+  })
+
+  // タイムシフトウィンドウの作成イベント受信
+  ipcMain.handle('open-timeshift', () => {
+    // 子ウィンドウを作成
+    const subWindow = new BrowserWindow({
+      title: 'Timeshift Window',
+      webPreferences: {
+        preload: join(__dirname, '../preload/index.js'),
+        sandbox: false
+      },
+      width: 1280,
+      height: 720
+    })
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+      subWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/timeshift.html`)
+    } else {
+      subWindow.loadFile(join(__dirname, '../renderer/timeshift.html'))
+    }
+  })
 }
 
 // This method will be called when Electron has finished
@@ -46,9 +76,6 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
-
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
 

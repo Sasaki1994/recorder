@@ -12,20 +12,20 @@ function App(): JSX.Element {
 
   return (
     <>
+      <button
+        style={{ position: 'absolute', top: 0, left: 0 }}
+        onClick={() => {
+          window.api.openTimeshift()
+        }}
+      >
+        Open!!
+      </button>
       <Camera
         videoSrc={testVideo}
         backgroundColor="rgb(255, 126, 126)"
         zIndex={zIndexes[0]}
         onDragStart={() => {
           takeTop(0)
-        }}
-      />
-      <Camera
-        videoSrc={testVideo}
-        backgroundColor="rgb(255, 126, 126)"
-        zIndex={zIndexes[1]}
-        onDragStart={() => {
-          takeTop(1)
         }}
       />
     </>
