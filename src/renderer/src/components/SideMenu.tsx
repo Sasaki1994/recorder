@@ -2,14 +2,14 @@ import React from 'react'
 import { Property } from 'csstype'
 import RestoreIcon from '@mui/icons-material/Restore'
 import Slider from '@mui/material/Slider'
+import useTimeshift from '../hooks/useTimeshift'
 
 interface SideMenuProps {
   width: Property.Width<string | number> | undefined
-  timeshiftState: string
 }
 
-const SideMenu: React.FC<SideMenuProps> = ({ width, timeshiftState }) => {
-  const [tshiftValue, setTshiftValue] = React.useState<number>(5)
+const SideMenu: React.FC<SideMenuProps> = ({ width }) => {
+  const { mode, switchMode, delayTime, setDelayTime } = useTimeshift()
   return (
     <div
       style={{
@@ -30,12 +30,11 @@ const SideMenu: React.FC<SideMenuProps> = ({ width, timeshiftState }) => {
       <RestoreIcon
         sx={{ fontSize: 40 }}
         style={{
-          color: timeshiftState === 'hidden' ? '#e0e0e0' : '#e03c3c',
+          color: mode === 'preview' ? '#e0e0e0' : '#e03c3c',
           cursor: 'pointer'
         }}
         onClick={() => {
-          window.api.switchTimeshift()
-          window.api.openTimeshift('visible')
+          switchMode()
         }}
       />
       <Slider
@@ -46,16 +45,15 @@ const SideMenu: React.FC<SideMenuProps> = ({ width, timeshiftState }) => {
         track="inverted"
         aria-label="timeshift seconds"
         defaultValue={-5}
-        value={timeshiftState === 'hidden' ? 0 : tshiftValue}
+        value={mode === 'preview' ? 0 : -1 * delayTime}
         step={5}
         min={-30}
         max={0}
         onChange={(_event, value) => {
-          setTshiftValue(value as number)
-          window.api.sendMenuProps({ delayTime: value as number })
+          setDelayTime(-1 * (value as number))
         }}
         valueLabelDisplay="auto"
-        disabled={timeshiftState === 'hidden'}
+        disabled={mode === 'preview'}
       />
     </div>
   )

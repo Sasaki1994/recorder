@@ -1,16 +1,8 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-const api = {
-  openTimeshift: (init?: string): Promise<void> => ipcRenderer.invoke('open-timeshift', init),
-  switchTimeshift: (): Promise<void> => ipcRenderer.invoke('switch-timeshift'),
-  sendMenuProps: (props): Promise<void> => ipcRenderer.invoke('menu-props', props),
-  receiveMenuProps: (listener): Electron.IpcRenderer => ipcRenderer.on('menu-props', listener),
-  recieveConfig: (listener): Electron.IpcRenderer => ipcRenderer.on('config', listener),
-  recieveTimeshiftState: (listener): Electron.IpcRenderer =>
-    ipcRenderer.on('timeshift-state', listener)
-}
+const api = {}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
