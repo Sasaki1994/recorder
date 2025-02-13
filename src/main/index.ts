@@ -112,7 +112,8 @@ function createTimeshiftWindow(mainWindow: BrowserWindow, init: string): Browser
     show: init === 'visible' ? true : false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      backgroundThrottling: false
     },
     width: mainWindow.getSize()[0] - config.sideWidth,
     height: mainWindow.getSize()[1],
