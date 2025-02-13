@@ -95,6 +95,14 @@ function setupTimeshiftWindow(mainWindow: BrowserWindow): void {
       }
     }
   })
+
+  ipcMain.handle('menu-props', (_event, props) => {
+    if (!timeshiftWindowId) return
+    const subWindow = BrowserWindow.fromId(timeshiftWindowId)
+    if (subWindow) {
+      subWindow.webContents.send('menu-props', props)
+    }
+  })
 }
 
 function createTimeshiftWindow(mainWindow: BrowserWindow, init: string): BrowserWindow {

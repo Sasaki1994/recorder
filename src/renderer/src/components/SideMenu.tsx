@@ -52,6 +52,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ width, timeshiftState }) => {
         max={0}
         onChange={(_event, value) => {
           setTshiftValue(value as number)
+          window.api.sendMenuProps({ delayTime: value as number })
         }}
         valueLabelDisplay="auto"
         disabled={timeshiftState === 'hidden'}
