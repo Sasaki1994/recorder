@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
@@ -11,6 +11,7 @@ const config = {
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
+    title: '4D Recorder',
     width: config.mainWindow.width,
     height: config.mainWindow.height,
     show: false,
@@ -35,6 +36,10 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  session.defaultSession.setDevicePermissionHandler(() => {
+    return true
+  })
 }
 
 // This method will be called when Electron has finished

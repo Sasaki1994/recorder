@@ -1,18 +1,18 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Rnd } from 'react-rnd'
 import { useInterval } from 'react-use'
 
 interface CameraProps {
-  videoSrc?: string
-  backgroundColor?: string
+  videoStream?: MediaStream
+  initialPosition?: { x: number; y: number }
   zIndex?: number
   onDragStart?: () => void
   delayTime?: number
 }
 
 const Camera: React.FC<CameraProps> = ({
-  videoSrc,
-  backgroundColor,
+  videoStream,
+  initialPosition,
   zIndex,
   onDragStart,
   delayTime
@@ -25,6 +25,12 @@ const Camera: React.FC<CameraProps> = ({
   const recordingTime = 30 // seconds
   const frameRate = 30 // fps
   const savedImageCount = recordingTime * frameRate + 5 // 5フレームのバッファ
+
+  useEffect(() => {
+    if (videoStream && captureRef.current) {
+      captureRef.current.srcObject = videoStream
+    }
+  }, [videoStream])
 
   useInterval(() => {
     if (captureRef.current && canvasRef.current) {
@@ -75,7 +81,7 @@ const Camera: React.FC<CameraProps> = ({
         setFocusOn(false)
       }}
       style={{
-        backgroundColor: backgroundColor ?? 'rgba(158, 158, 158, 1)',
+        backgroundColor: 'rgb(116, 116, 116)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -84,13 +90,13 @@ const Camera: React.FC<CameraProps> = ({
         overflow: 'hidden'
       }}
       default={{
-        x: 0,
-        y: 0,
+        x: -300 + (initialPosition?.x ?? 0),
+        y: -300 + (initialPosition?.y ?? 0),
         width: 640,
         height: 320
       }}
     >
-      {videoSrc ? (
+      {videoStream ? (
         <>
           <video
             style={{
@@ -99,7 +105,6 @@ const Camera: React.FC<CameraProps> = ({
               objectFit: 'cover',
               display: delayTime && delayTime > 0 ? 'none' : 'block'
             }}
-            src={videoSrc}
             autoPlay
             loop
             muted
