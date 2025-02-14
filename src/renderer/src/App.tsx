@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import SideMenu from './components/SideMenu'
+import Menu from './components/Menu'
 import CameraCanvas from './components/CameraCanvas'
 
 function App(): JSX.Element {
@@ -12,7 +12,7 @@ function App(): JSX.Element {
   }, [])
   return (
     <div>
-      <SideMenu width={80} />
+      <Menu height={80} />
       <CameraCanvas videoDevices={videoDevices} />
     </div>
   )

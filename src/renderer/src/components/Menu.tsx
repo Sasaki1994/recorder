@@ -5,48 +5,37 @@ import Slider from '@mui/material/Slider'
 import useTimeshift from '../hooks/useTimeshift'
 
 interface SideMenuProps {
-  width: Property.Width<string | number> | undefined
+  height: Property.Height<string | number> | undefined
 }
 
-const SideMenu: React.FC<SideMenuProps> = ({ width }) => {
+const Menu: React.FC<SideMenuProps> = ({ height }) => {
   const { mode, switchMode, delayTime, setDelayTime } = useTimeshift()
   return (
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
-        paddingTop: '50px',
+        justifyContent: 'center',
+        columnGap: '30px',
         position: 'fixed',
         left: 0,
-        top: 0,
+        bottom: 0,
         zIndex: 1000,
-        width,
-        height: '100vh',
+        width: '100vw',
+        height,
         backgroundColor: '#1b1b1f',
-        borderRight: '1px solid #2c2c2e'
+        borderTop: '3px solid #2c2c2e'
       }}
     >
-      <RestoreIcon
-        sx={{ fontSize: 40 }}
-        style={{
-          color: mode === 'preview' ? '#e0e0e0' : '#e03c3c',
-          cursor: 'pointer'
-        }}
-        onClick={() => {
-          switchMode()
-        }}
-      />
       <Slider
         style={{
-          width: '50px',
-          marginBottom: '40px'
+          width: '60vw'
         }}
         track="inverted"
         aria-label="timeshift seconds"
         defaultValue={-5}
         value={mode === 'preview' ? 0 : -1 * delayTime}
-        step={5}
+        // step={5}
         min={-30}
         max={0}
         onChange={(_event, value) => {
@@ -55,8 +44,21 @@ const SideMenu: React.FC<SideMenuProps> = ({ width }) => {
         valueLabelDisplay="auto"
         disabled={mode === 'preview'}
       />
+      <div style={{ width: '40px' }}>
+        <RestoreIcon
+          sx={{ fontSize: 40 }}
+          style={{
+            color: mode === 'preview' ? '#e0e0e0' : '#e03c3c',
+            cursor: 'pointer'
+            // display: 'none'
+          }}
+          onClick={() => {
+            switchMode()
+          }}
+        />
+      </div>
     </div>
   )
 }
 
-export default SideMenu
+export default Menu
