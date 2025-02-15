@@ -8,6 +8,7 @@ interface CameraProps {
   zIndex?: number
   onDragStart?: () => void
   delayTime?: number
+  stopStream?: boolean
 }
 
 const Camera: React.FC<CameraProps> = ({
@@ -15,14 +16,15 @@ const Camera: React.FC<CameraProps> = ({
   initialPosition,
   zIndex,
   onDragStart,
-  delayTime
+  delayTime,
+  stopStream
 }) => {
   const [focusOn, setFocusOn] = React.useState(false)
   const captureRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const dImagesRef = useRef<ImageData[]>([])
   const delayedCanvasRef = useRef<HTMLCanvasElement>(null)
-  const recordingTime = 30 // seconds
+  const recordingTime = 60 // seconds
   const frameRate = 30 // fps
   const savedImageCount = recordingTime * frameRate + 5 // 5フレームのバッファ
 
@@ -40,12 +42,14 @@ const Camera: React.FC<CameraProps> = ({
       if (ctx) {
         ctx.drawImage(captureRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height)
         // 先頭フレームとして追加
-        dImagesRef.current = [
-          ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height),
-          ...dImagesRef.current
-        ]
+        if (!stopStream) {
+          dImagesRef.current = [
+            ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height),
+            ...dImagesRef.current
+          ]
+        }
       }
-      if (dImagesRef.current.length > savedImageCount) {
+      if (!stopStream && dImagesRef.current.length > savedImageCount) {
         dImagesRef.current.pop()
       }
 

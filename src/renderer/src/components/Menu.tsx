@@ -1,22 +1,22 @@
 import React from 'react'
 import { Property } from 'csstype'
-import RestoreIcon from '@mui/icons-material/Restore'
 import Slider from '@mui/material/Slider'
 import useTimeshift from '../hooks/useTimeshift'
+import { PlayCircle, PauseCircle } from '@mui/icons-material'
 
 interface SideMenuProps {
   height: Property.Height<string | number> | undefined
 }
 
 const Menu: React.FC<SideMenuProps> = ({ height }) => {
-  const { mode, switchMode, delayTime, setDelayTime } = useTimeshift()
+  const { mode, switchMode, delayTime, setDelayTime, switchStopStream, stopStream } = useTimeshift()
   return (
     <div
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        columnGap: '30px',
+        columnGap: '20px',
         position: 'fixed',
         left: 0,
         bottom: 0,
@@ -34,28 +34,48 @@ const Menu: React.FC<SideMenuProps> = ({ height }) => {
         track="inverted"
         aria-label="timeshift seconds"
         defaultValue={-5}
-        value={mode === 'preview' ? 0 : -1 * delayTime}
-        // step={5}
-        min={-30}
+        value={-1 * delayTime}
+        min={-60}
         max={0}
         onChange={(_event, value) => {
           setDelayTime(-1 * (value as number))
+          if (value === 0) {
+            switchMode('preview')
+            if (stopStream) {
+              switchStopStream()
+            }
+          } else {
+            switchMode('timeshift')
+          }
         }}
         valueLabelDisplay="auto"
-        disabled={mode === 'preview'}
       />
       <div style={{ width: '40px' }}>
-        <RestoreIcon
-          sx={{ fontSize: 40 }}
-          style={{
-            color: mode === 'preview' ? '#e0e0e0' : '#e03c3c',
-            cursor: 'pointer'
-            // display: 'none'
-          }}
-          onClick={() => {
-            switchMode()
-          }}
-        />
+        {stopStream ? (
+          <PlayCircle
+            sx={{ fontSize: 40 }}
+            style={{
+              display: mode === 'preview' ? 'none' : '',
+              color: '#e0e0e0',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              switchStopStream()
+            }}
+          />
+        ) : (
+          <PauseCircle
+            sx={{ fontSize: 40 }}
+            style={{
+              display: mode === 'preview' ? 'none' : '',
+              color: '#e0e0e0',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              switchStopStream()
+            }}
+          />
+        )}
       </div>
     </div>
   )

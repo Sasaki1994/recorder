@@ -13,7 +13,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices }) => {
     newZIndexes[index] = Math.max(...zIndexes) + 1
     setZindexes(newZIndexes)
   }
-  const { mode, delayTime } = useTimeshift()
+  const { mode, delayTime, stopStream } = useTimeshift()
 
   const [videoStreams, setVideoStreams] = useState<MediaStream[]>([])
 
@@ -44,6 +44,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices }) => {
           }}
           initialPosition={{ x: 30 * i, y: 30 * i }}
           delayTime={mode == 'preview' ? 0 : delayTime}
+          stopStream={stopStream}
         />
       ))}
     </div>
