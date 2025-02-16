@@ -3,13 +3,30 @@ import { Property } from 'csstype'
 import Slider from '@mui/material/Slider'
 import useTimeshift from '../hooks/useTimeshift'
 import { PlayCircle, PauseCircle } from '@mui/icons-material'
+import useDeviceSettings from '../hooks/useDeviceSettings'
+import MaterialMenu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Switch from '@mui/material/Switch'
+
+import ListIcon from '@mui/icons-material/List'
 
 interface SideMenuProps {
   height: Property.Height<string | number> | undefined
+  videoDevices: MediaDeviceInfo[]
 }
 
-const Menu: React.FC<SideMenuProps> = ({ height }) => {
+const Menu: React.FC<SideMenuProps> = ({ height, videoDevices }) => {
   const { mode, switchMode, delayTime, setDelayTime, switchStopStream, stopStream } = useTimeshift()
+  const { devicesOn, switchDeviceOn } = useDeviceSettings(videoDevices)
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = (): void => {
+    setAnchorEl(null)
+  }
   return (
     <div
       style={{
@@ -76,6 +93,39 @@ const Menu: React.FC<SideMenuProps> = ({ height }) => {
             }}
           />
         )}
+      </div>
+      <div style={{ width: '40px' }}>
+        <div
+          id="demo-positioned-button"
+          aria-controls={open ? 'demo-positioned-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
+          onClick={handleClick}
+        >
+          <ListIcon sx={{ fontSize: 40, color: '#e0e0e0', cursor: 'pointer' }} />
+        </div>
+        <MaterialMenu
+          id="demo-positioned-menu"
+          aria-labelledby="demo-positioned-button"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'left'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left'
+          }}
+        >
+          {videoDevices.map((device, i) => (
+            <MenuItem key={i} onClick={() => switchDeviceOn(i)}>
+              <Switch checked={devicesOn[i]} />
+              {device.label}
+            </MenuItem>
+          ))}
+        </MaterialMenu>
       </div>
     </div>
   )

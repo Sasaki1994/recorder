@@ -3,12 +3,13 @@ import { Rnd } from 'react-rnd'
 import { useInterval } from 'react-use'
 
 interface CameraProps {
-  videoStream?: MediaStream
+  videoStream?: MediaStream | null
   initialPosition?: { x: number; y: number }
   zIndex?: number
   onDragStart?: () => void
   delayTime?: number
   stopStream?: boolean
+  focus?: boolean
 }
 
 const Camera: React.FC<CameraProps> = ({
@@ -17,7 +18,8 @@ const Camera: React.FC<CameraProps> = ({
   zIndex,
   onDragStart,
   delayTime,
-  stopStream
+  stopStream,
+  focus
 }) => {
   const [focusOn, setFocusOn] = React.useState(false)
   const captureRef = useRef<HTMLVideoElement>(null)
@@ -25,7 +27,7 @@ const Camera: React.FC<CameraProps> = ({
   const dImagesRef = useRef<ImageData[]>([])
   const delayedCanvasRef = useRef<HTMLCanvasElement>(null)
   const recordingTime = 60 // seconds
-  const frameRate = 30 // fps
+  const frameRate = 10 // fps
   const savedImageCount = recordingTime * frameRate + 5 // 5フレームのバッファ
 
   useEffect(() => {
@@ -33,6 +35,10 @@ const Camera: React.FC<CameraProps> = ({
       captureRef.current.srcObject = videoStream
     }
   }, [videoStream])
+
+  useEffect(() => {
+    setFocusOn(!!focus)
+  }, [focus])
 
   useInterval(() => {
     if (captureRef.current && canvasRef.current) {
@@ -86,7 +92,7 @@ const Camera: React.FC<CameraProps> = ({
       }}
       style={{
         backgroundColor: 'rgb(116, 116, 116)',
-        display: 'flex',
+        display: videoStream ? 'flex' : 'none',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: zIndex ?? 0,
@@ -94,8 +100,8 @@ const Camera: React.FC<CameraProps> = ({
         overflow: 'hidden'
       }}
       default={{
-        x: -300 + (initialPosition?.x ?? 0),
-        y: -300 + (initialPosition?.y ?? 0),
+        x: -150 + (initialPosition?.x ?? 0),
+        y: -150 + (initialPosition?.y ?? 0),
         width: 640,
         height: 320
       }}

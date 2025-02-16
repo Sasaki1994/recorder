@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Camera from '../components/Camera'
 import useTimeshift from '../hooks/useTimeshift'
+import useDeviceSettings from '../hooks/useDeviceSettings'
 
 interface CameraCanvasProps {
   videoDevices: MediaDeviceInfo[]
@@ -15,28 +16,31 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices }) => {
   }
   const { mode, delayTime, stopStream } = useTimeshift()
 
-  const [videoStreams, setVideoStreams] = useState<MediaStream[]>([])
-
+  const [videoStreams, setVideoStreams] = useState<(MediaStream | null)[]>([])
+  const { devicesOn } = useDeviceSettings(videoDevices)
   useEffect(() => {
     if (videoDevices.length === 0) return
     Promise.all(
-      videoDevices.map(async (device) => {
-        const constraints = {
-          video: {
-            deviceId: device.deviceId
-          }
+      videoDevices.map(async (device, i) => {
+        if (!devicesOn[i]) {
+          return null
         }
-        return await navigator.mediaDevices.getUserMedia(constraints)
+        return await navigator.mediaDevices.getUserMedia({
+          video: {
+            deviceId: device.deviceId,
+            frameRate: { ideal: 10 }
+          }
+        })
       })
     ).then((streams) => {
       setVideoStreams(streams)
     })
-  }, [videoDevices])
+  }, [videoDevices, devicesOn])
   return (
     <div>
       {videoStreams.map((stream, i) => (
         <Camera
-          key={stream.id}
+          key={i}
           videoStream={stream}
           zIndex={zIndexes[i]}
           onDragStart={() => {

@@ -12,7 +12,7 @@ function App(): JSX.Element {
   }, [])
   return (
     <div>
-      <Menu height={80} />
+      <Menu height={80} videoDevices={videoDevices} />
       <CameraCanvas videoDevices={videoDevices} />
     </div>
   )
