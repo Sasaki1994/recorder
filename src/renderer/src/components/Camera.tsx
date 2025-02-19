@@ -62,7 +62,7 @@ const Camera: React.FC<CameraProps> = ({
       // delaytime前の画像を表示
       if (
         delayedCanvasRef.current &&
-        delayTime &&
+        delayTime !== undefined &&
         dImagesRef.current.length > delayTime * frameRate
       ) {
         delayedCanvasRef.current.width = captureRef.current.videoWidth
@@ -113,7 +113,7 @@ const Camera: React.FC<CameraProps> = ({
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              display: delayTime && delayTime > 0 ? 'none' : 'block'
+              display: 'none'
             }}
             autoPlay
             loop
@@ -131,7 +131,7 @@ const Camera: React.FC<CameraProps> = ({
           />
           <canvas
             style={{
-              display: delayTime && delayTime > 0 ? 'block' : 'none',
+              display: 'block',
               width: '100%',
               height: '100%',
               objectFit: 'cover'

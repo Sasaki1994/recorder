@@ -26,6 +26,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices }) => {
           return null
         }
         return await navigator.mediaDevices.getUserMedia({
+          audio: false,
           video: {
             deviceId: device.deviceId,
             frameRate: { ideal: 10 }

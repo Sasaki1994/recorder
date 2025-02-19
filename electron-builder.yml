@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: 4D Recorder
+productName: 4DRecorder
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: 4D Recorder
+  executableName: 4DRecorder
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
