@@ -5,14 +5,19 @@ import CameraCanvas from './components/CameraCanvas'
 function App(): JSX.Element {
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([])
   useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
+    getAllDevices()
+  }, [])
+
+  const getAllDevices = async (): Promise<void> => {
+    setVideoDevices([])
+    await navigator.mediaDevices.enumerateDevices().then((devices) => {
       const videoDevices = devices.filter((device) => device.kind === 'videoinput')
       setVideoDevices(videoDevices)
     })
-  }, [])
+  }
   return (
     <div>
-      <Menu height={80} videoDevices={videoDevices} />
+      <Menu height={80} videoDevices={videoDevices} onRefresh={getAllDevices} />
       <CameraCanvas videoDevices={videoDevices} />
     </div>
   )

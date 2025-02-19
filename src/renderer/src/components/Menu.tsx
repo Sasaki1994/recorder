@@ -3,6 +3,7 @@ import { Property } from 'csstype'
 import Slider from '@mui/material/Slider'
 import useTimeshift from '../hooks/useTimeshift'
 import { PlayCircle, PauseCircle } from '@mui/icons-material'
+import RefreshIcon from '@mui/icons-material/Refresh'
 import useDeviceSettings from '../hooks/useDeviceSettings'
 import MaterialMenu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
@@ -13,9 +14,10 @@ import ListIcon from '@mui/icons-material/List'
 interface SideMenuProps {
   height: Property.Height<string | number> | undefined
   videoDevices: MediaDeviceInfo[]
+  onRefresh?: () => void
 }
 
-const Menu: React.FC<SideMenuProps> = ({ height, videoDevices }) => {
+const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
   const { mode, switchMode, delayTime, setDelayTime, switchStopStream, stopStream } = useTimeshift()
   const { devicesOn, switchDeviceOn } = useDeviceSettings(videoDevices)
 
@@ -126,6 +128,18 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices }) => {
             </MenuItem>
           ))}
         </MaterialMenu>
+      </div>
+      <div style={{ width: '40px' }}>
+        <RefreshIcon
+          sx={{ fontSize: 40 }}
+          style={{
+            color: '#e0e0e0',
+            cursor: 'pointer'
+          }}
+          onClick={() => {
+            onRefresh?.()
+          }}
+        />
       </div>
     </div>
   )
