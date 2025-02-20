@@ -12,7 +12,14 @@ const useDeviceSettings = (devices: MediaDeviceInfo[]): UseDeviceSettings => {
   const [devicesOn, setDevicesOn] = useAtom(deviceOnAtom)
 
   useEffect(() => {
-    setDevicesOn(devices.map(() => true))
+    // 元々のdevicesOnの値を保ちつつ、devicesの長さだけtrueを追加
+    setDevicesOn((prev) => {
+      const newDevicesOn = [...prev]
+      if (devices.length > prev.length) {
+        newDevicesOn.push(...Array(devices.length - prev.length).fill(true))
+      }
+      return newDevicesOn
+    })
   }, [devices])
 
   const switchDeviceOn = (index: number): void => {
