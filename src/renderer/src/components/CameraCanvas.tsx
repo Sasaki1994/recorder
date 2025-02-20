@@ -5,10 +5,13 @@ import useDeviceSettings from '../hooks/useDeviceSettings'
 
 interface CameraCanvasProps {
   videoDevices: MediaDeviceInfo[]
+  menuHeight: number
 }
 
-const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices }) => {
+const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight }) => {
   const [zIndexes, setZindexes] = useState<number[]>(Array(30).fill(0)) // 初期値が必要なので、十分に大きい長さで0埋め
+  const initialFrameRefs = React.useRef<Frame[]>([])
+  const canvasSize = { width: ((720 - menuHeight) * 16) / 9, height: 720 - menuHeight }
   const takeTop = (index: number): void => {
     const newZIndexes = [...zIndexes]
     newZIndexes[index] = Math.max(...zIndexes) + 1
@@ -17,7 +20,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices }) => {
   const { mode, delayTime, stopStream } = useTimeshift()
 
   const [videoStreams, setVideoStreams] = useState<(MediaStream | null)[]>([])
-  const { devicesOn } = useDeviceSettings(videoDevices)
+  const { devicesOn, rotateDegs } = useDeviceSettings(videoDevices)
   useEffect(() => {
     if (videoDevices.length === 0) return
     Promise.all(
@@ -34,9 +37,44 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices }) => {
         })
       })
     ).then((streams) => {
-      setVideoStreams(streams)
+      setVideoStreams([streams[0]])
+      initialFrameRefs.current = getInitialProps(1)
     })
   }, [videoDevices, devicesOn])
+
+  interface Frame {
+    width: number
+    height: number
+    x: number
+    y: number
+  }
+
+  const getInitialProps = (n: number): Frame[] => {
+    const { width, height } = canvasSize
+    const frameSize = { width: width / 3, height: height / 3 }
+
+    if (n === 0) return []
+    if (n === 1)
+      return [{ width: width, height: height - menuHeight, x: 0, y: (-1 * menuHeight) / 8 }]
+    if (n === 2)
+      return [
+        { width: width / 2, height: height / 2, x: (-1 * width) / 8 - 20, y: 0 },
+        { width: width / 2, height: height / 2, x: width / 8 + 20, y: 0 }
+      ]
+    return Array(n)
+      .fill(frameSize)
+      .map((frame, i) => {
+        const x = i % 4
+        const y = Math.floor(i / 4)
+        const framex = (x % 2 === 0 ? (-1 * width) / 8 : width / 8) + y * 10
+        const framey =
+          (Math.floor(x / 2) === 0
+            ? (-1 * (height - menuHeight)) / 8 - (2 * menuHeight) / 8
+            : (height - menuHeight) / 8 - (2 * menuHeight) / 8) +
+          y * 10
+        return { ...frame, x: framex, y: framey }
+      })
+  }
   return (
     <div>
       {videoStreams.map((stream, i) => (
@@ -47,9 +85,10 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices }) => {
           onDragStart={() => {
             takeTop(i)
           }}
-          initialPosition={{ x: 30 * i, y: 30 * i }}
+          initialProps={initialFrameRefs.current[i]}
           delayTime={mode == 'preview' ? 0 : delayTime}
           stopStream={stopStream}
+          rotateDeg={rotateDegs[i]}
         />
       ))}
     </div>

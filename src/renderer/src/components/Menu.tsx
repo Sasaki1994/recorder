@@ -8,6 +8,7 @@ import useDeviceSettings from '../hooks/useDeviceSettings'
 import MaterialMenu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
+import Rotate90DegreesCwIcon from '@mui/icons-material/Rotate90DegreesCw'
 
 import ListIcon from '@mui/icons-material/List'
 
@@ -19,7 +20,7 @@ interface SideMenuProps {
 
 const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
   const { mode, switchMode, delayTime, setDelayTime, switchStopStream, stopStream } = useTimeshift()
-  const { devicesOn, switchDeviceOn } = useDeviceSettings(videoDevices)
+  const { devicesOn, switchDeviceOn, Rotate } = useDeviceSettings(videoDevices)
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -97,13 +98,7 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
         )}
       </div>
       <div style={{ width: '40px' }}>
-        <div
-          id="demo-positioned-button"
-          aria-controls={open ? 'demo-positioned-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
-          onClick={handleClick}
-        >
+        <div aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClick}>
           <ListIcon sx={{ fontSize: 40, color: '#e0e0e0', cursor: 'pointer' }} />
         </div>
         <MaterialMenu
@@ -122,8 +117,18 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
           }}
         >
           {videoDevices.map((device, i) => (
-            <MenuItem key={i} onClick={() => switchDeviceOn(i)}>
-              <Switch checked={devicesOn[i]} />
+            <MenuItem key={i} style={{ cursor: 'default' }}>
+              <Switch checked={devicesOn[i]} onClick={() => switchDeviceOn(i)} />
+              <Rotate90DegreesCwIcon
+                sx={{ marginRight: 3, marginLeft: 2 }}
+                style={{ cursor: devicesOn[i] ? 'pointer' : 'default' }}
+                color={devicesOn[i] ? 'action' : 'disabled'}
+                onClick={() => {
+                  if (devicesOn[i]) {
+                    Rotate(i)
+                  }
+                }}
+              />
               {device.label}
             </MenuItem>
           ))}
