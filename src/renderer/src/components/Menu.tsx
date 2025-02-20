@@ -20,7 +20,7 @@ interface SideMenuProps {
 
 const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
   const { mode, switchMode, delayTime, setDelayTime, switchStopStream, stopStream } = useTimeshift()
-  const { devicesOn, switchDeviceOn } = useDeviceSettings(videoDevices)
+  const { devicesOn, switchDeviceOn, Rotate } = useDeviceSettings(videoDevices)
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -123,6 +123,11 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
                 sx={{ marginRight: 3, marginLeft: 2 }}
                 style={{ cursor: devicesOn[i] ? 'pointer' : 'default' }}
                 color={devicesOn[i] ? 'action' : 'disabled'}
+                onClick={() => {
+                  if (devicesOn[i]) {
+                    Rotate(i)
+                  }
+                }}
               />
               {device.label}
             </MenuItem>

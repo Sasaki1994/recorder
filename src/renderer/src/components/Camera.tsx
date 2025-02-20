@@ -10,6 +10,7 @@ interface CameraProps {
   delayTime?: number
   stopStream?: boolean
   focus?: boolean
+  rotateDeg?: number
 }
 
 const Camera: React.FC<CameraProps> = ({
@@ -19,7 +20,8 @@ const Camera: React.FC<CameraProps> = ({
   onDragStart,
   delayTime,
   stopStream,
-  focus
+  focus,
+  rotateDeg
 }) => {
   const [focusOn, setFocusOn] = React.useState(false)
   const captureRef = useRef<HTMLVideoElement>(null)
@@ -46,6 +48,11 @@ const Camera: React.FC<CameraProps> = ({
       canvasRef.current.height = captureRef.current.videoHeight
       const ctx = canvasRef.current.getContext('2d')
       if (ctx) {
+        if (rotateDeg) {
+          ctx.translate(canvasRef.current.width / 2, canvasRef.current.height / 2)
+          ctx.rotate((rotateDeg * Math.PI) / 180)
+          ctx.translate(-canvasRef.current.width / 2, -canvasRef.current.height / 2)
+        }
         ctx.drawImage(captureRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height)
         // 先頭フレームとして追加
         if (!stopStream) {
