@@ -4,7 +4,12 @@ import { useInterval } from 'react-use'
 
 interface CameraProps {
   videoStream?: MediaStream | null
-  initialPosition?: { x: number; y: number }
+  initialProps?: {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
   zIndex?: number
   onDragStart?: () => void
   delayTime?: number
@@ -15,7 +20,7 @@ interface CameraProps {
 
 const Camera: React.FC<CameraProps> = ({
   videoStream,
-  initialPosition,
+  initialProps,
   zIndex,
   onDragStart,
   delayTime,
@@ -28,6 +33,7 @@ const Camera: React.FC<CameraProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const dImagesRef = useRef<ImageData[]>([])
   const delayedCanvasRef = useRef<HTMLCanvasElement>(null)
+  const rndRef = useRef<Rnd>(null)
   const recordingTime = 60 // seconds
   const frameRate = 10 // fps
   const savedImageCount = recordingTime * frameRate + 5 // 5フレームのバッファ
@@ -82,8 +88,20 @@ const Camera: React.FC<CameraProps> = ({
     }
   }, 1000 / frameRate)
 
+  useEffect(() => {
+    if (rndRef.current && rotateDeg) {
+      const elem = rndRef.current.getSelfElement()
+      if (!elem) return
+      rndRef.current.updateSize({
+        width: elem.clientHeight,
+        height: elem.clientWidth
+      })
+    }
+  }, [rotateDeg])
+
   return (
     <Rnd
+      ref={rndRef}
       onDragStart={() => {
         setFocusOn(true)
         onDragStart?.()
@@ -107,10 +125,10 @@ const Camera: React.FC<CameraProps> = ({
         overflow: 'hidden'
       }}
       default={{
-        x: -150 + (initialPosition?.x ?? 0),
-        y: -150 + (initialPosition?.y ?? 0),
-        width: 640,
-        height: 320
+        x: (-1 * (initialProps?.width ?? 480)) / 4 + (initialProps?.x ?? 0),
+        y: (-1 * (initialProps?.height ?? 270)) / 4 + (initialProps?.y ?? 0),
+        width: initialProps?.width ?? 480,
+        height: initialProps?.height ?? 270
       }}
     >
       {videoStream ? (

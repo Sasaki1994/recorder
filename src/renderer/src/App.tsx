@@ -18,7 +18,7 @@ function App(): JSX.Element {
   return (
     <div>
       <Menu height={80} videoDevices={videoDevices} onRefresh={getAllDevices} />
-      <CameraCanvas videoDevices={videoDevices} />
+      <CameraCanvas videoDevices={videoDevices} menuHeight={80} />
     </div>
   )
 }
