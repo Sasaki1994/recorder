@@ -33,14 +33,14 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
           video: {
             deviceId: device.deviceId,
             frameRate: { ideal: 10 },
-            width: 1280,
-            height: 720
+            width: 1280 / videoDevices.length,
+            height: 720 / videoDevices.length
           }
         })
       })
     ).then((streams) => {
       setVideoStreams(streams)
-      initialFrameRefs.current = getInitialProps(streams.filter((stream) => stream).length)
+      initialFrameRefs.current = getInitialProps(videoDevices.length)
     })
   }, [videoDevices, devicesOn])
 
