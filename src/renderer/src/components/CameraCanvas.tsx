@@ -53,15 +53,15 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
 
   const getInitialProps = (n: number): Frame[] => {
     const { width, height } = canvasSize
-    const frameSize = { width: width / 3, height: height / 3 }
+    const frameSize = { width: width / 2, height: height / 2 }
 
     if (n === 0) return []
     if (n === 1)
       return [{ width: width, height: height - menuHeight, x: 0, y: (-1 * menuHeight) / 8 }]
     if (n === 2)
       return [
-        { width: width / 2, height: height / 2, x: (-1 * width) / 8 - 20, y: 0 },
-        { width: width / 2, height: height / 2, x: width / 8 + 20, y: 0 }
+        { width: width / 1.8, height: height / 1.8, x: (-1 * width) / 8 - 20, y: 0 },
+        { width: width / 1.8, height: height / 1.8, x: width / 8 + 20, y: 0 }
       ]
     return Array(n)
       .fill(frameSize)
@@ -71,8 +71,8 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
         const framex = (x % 2 === 0 ? (-1 * width) / 8 : width / 8) + y * 10
         const framey =
           (Math.floor(x / 2) === 0
-            ? (-1 * (height - menuHeight)) / 8 - (2 * menuHeight) / 8
-            : (height - menuHeight) / 8 - (2 * menuHeight) / 8) +
+            ? (-1 * height) / 8 - (2 * menuHeight) / 8
+            : height / 8 - (2 * menuHeight) / 8) +
           y * 10
         return { ...frame, x: framex, y: framey }
       })
