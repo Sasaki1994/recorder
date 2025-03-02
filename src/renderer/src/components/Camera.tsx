@@ -162,7 +162,8 @@ const Camera: React.FC<CameraProps> = ({
             color: 'white',
             cursor: 'pointer'
           }}
-          onMouseDown={() => {
+          onMouseEnter={() => {
+            onDragStart?.()
             setZoomdownProps({
               x: rndRef.current?.getSelfElement()?.getBoundingClientRect().left ?? 0,
               y: rndRef.current?.getSelfElement()?.getBoundingClientRect().top ?? 0,
@@ -189,7 +190,8 @@ const Camera: React.FC<CameraProps> = ({
             color: 'white',
             cursor: 'pointer'
           }}
-          onClick={() => {
+          onMouseEnter={() => {
+            onDragStart?.()
             rndRef.current?.updateSize({
               width: zoomdownPrpos.width,
               height: zoomdownPrpos.height
