@@ -92,6 +92,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
           stopStream={stopStream}
           rotateDeg={rotateDegs[i]}
           gridOn={gridOn}
+          canvasSize={{ width: 1280, height: 720 - menuHeight }}
         />
       ))}
     </div>

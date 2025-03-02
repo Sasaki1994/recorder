@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Rnd } from 'react-rnd'
 import { useInterval } from 'react-use'
 import { drawGrid } from '../utils/drawGrid'
@@ -18,6 +18,10 @@ interface CameraProps {
   focus?: boolean
   rotateDeg?: number
   gridOn?: boolean
+  canvasSize?: {
+    width: number
+    height: number
+  }
 }
 
 const Camera: React.FC<CameraProps> = ({
@@ -29,9 +33,12 @@ const Camera: React.FC<CameraProps> = ({
   stopStream,
   focus,
   rotateDeg,
-  gridOn
+  gridOn,
+  canvasSize
 }) => {
-  const [focusOn, setFocusOn] = React.useState(false)
+  const [focusOn, setFocusOn] = useState(false)
+  const [zoomUp, setZoomUp] = useState(false)
+  const [zoomdownPrpos, setZoomdownProps] = useState({ x: 0, y: 0, width: 0, height: 0 })
   const captureRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const dImagesRef = useRef<ImageData[]>([])
@@ -107,74 +114,106 @@ const Camera: React.FC<CameraProps> = ({
   }, [rotateDeg])
 
   return (
-    <Rnd
-      ref={rndRef}
-      onDragStart={() => {
-        setFocusOn(true)
-        onDragStart?.()
-      }}
-      onDragStop={() => {
-        setFocusOn(false)
-      }}
-      onResizeStart={() => {
-        setFocusOn(true)
-      }}
-      onResizeStop={() => {
-        setFocusOn(false)
-      }}
-      style={{
-        backgroundColor: 'rgb(116, 116, 116)',
-        display: videoStream ? 'flex' : 'none',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: zIndex ?? 0,
-        border: focusOn ? '3px solid rgb(0, 30, 255)' : 'none',
-        overflow: 'hidden'
-      }}
-      default={{
-        x: (-1 * (initialProps?.width ?? 480)) / 4 + (initialProps?.x ?? 0),
-        y: (-1 * (initialProps?.height ?? 270)) / 4 + (initialProps?.y ?? 0),
-        width: initialProps?.width ?? 480,
-        height: initialProps?.height ?? 270
+    <div
+      onDoubleClick={() => {
+        if (!zoomUp) {
+          setZoomdownProps({
+            x: rndRef.current?.getSelfElement()?.getBoundingClientRect().left ?? 0,
+            y: rndRef.current?.getSelfElement()?.getBoundingClientRect().top ?? 0,
+            width: rndRef.current?.getSelfElement()?.clientWidth ?? 0,
+            height: rndRef.current?.getSelfElement()?.clientHeight ?? 0
+          })
+          rndRef.current?.updateSize({
+            width: canvasSize?.width ?? 1280,
+            height: canvasSize?.height ?? 720
+          })
+          rndRef.current?.updatePosition({
+            x: 0,
+            y: 0
+          })
+          setZoomUp(true)
+        } else {
+          rndRef.current?.updateSize({
+            width: zoomdownPrpos.width,
+            height: zoomdownPrpos.height
+          })
+          rndRef.current?.updatePosition({
+            x: zoomdownPrpos.x,
+            y: zoomdownPrpos.y
+          })
+          setZoomUp(false)
+        }
       }}
     >
-      {videoStream ? (
-        <>
-          <video
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'none'
-            }}
-            autoPlay
-            loop
-            muted
-            ref={captureRef}
-          />
-          <canvas
-            style={{
-              display: 'none',
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-            ref={canvasRef}
-          />
-          <canvas
-            style={{
-              display: 'block',
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover'
-            }}
-            ref={delayedCanvasRef}
-          />
-        </>
-      ) : (
-        <p style={{ fontSize: 24 }}>{'Device not available'}</p>
-      )}
-    </Rnd>
+      <Rnd
+        ref={rndRef}
+        onDragStart={() => {
+          setFocusOn(true)
+          onDragStart?.()
+        }}
+        onDragStop={() => {
+          setFocusOn(false)
+        }}
+        onResizeStart={() => {
+          setFocusOn(true)
+        }}
+        onResizeStop={() => {
+          setFocusOn(false)
+        }}
+        style={{
+          backgroundColor: 'rgb(116, 116, 116)',
+          display: videoStream ? 'flex' : 'none',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: zIndex ?? 0,
+          border: focusOn ? '3px solid rgb(0, 30, 255)' : 'none',
+          overflow: 'hidden'
+        }}
+        default={{
+          x: (-1 * (initialProps?.width ?? 480)) / 4 + (initialProps?.x ?? 0),
+          y: (-1 * (initialProps?.height ?? 270)) / 4 + (initialProps?.y ?? 0),
+          width: initialProps?.width ?? 480,
+          height: initialProps?.height ?? 270
+        }}
+      >
+        {videoStream ? (
+          <>
+            <video
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'none'
+              }}
+              autoPlay
+              loop
+              muted
+              ref={captureRef}
+            />
+            <canvas
+              style={{
+                display: 'none',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+              ref={canvasRef}
+            />
+            <canvas
+              style={{
+                display: 'block',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+              ref={delayedCanvasRef}
+            />
+          </>
+        ) : (
+          <p style={{ fontSize: 24 }}>{'Device not available'}</p>
+        )}
+      </Rnd>
+    </div>
   )
 }
 
