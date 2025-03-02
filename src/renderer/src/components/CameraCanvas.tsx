@@ -20,7 +20,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
   const { mode, delayTime, stopStream } = useTimeshift()
 
   const [videoStreams, setVideoStreams] = useState<(MediaStream | null)[]>([])
-  const { devicesOn, rotateDegs } = useDeviceSettings(videoDevices)
+  const { devicesOn, rotateDegs, gridOn } = useDeviceSettings(videoDevices)
   useEffect(() => {
     if (videoDevices.length === 0) return
     Promise.all(
@@ -91,6 +91,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
           delayTime={mode == 'preview' ? 0 : delayTime}
           stopStream={stopStream}
           rotateDeg={rotateDegs[i]}
+          gridOn={gridOn}
         />
       ))}
     </div>

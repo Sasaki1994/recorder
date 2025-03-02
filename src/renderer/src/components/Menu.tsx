@@ -4,6 +4,8 @@ import Slider from '@mui/material/Slider'
 import useTimeshift from '../hooks/useTimeshift'
 import { PlayCircle, PauseCircle } from '@mui/icons-material'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import GridOnIcon from '@mui/icons-material/GridOn'
+import GridOffIcon from '@mui/icons-material/GridOff'
 import useDeviceSettings from '../hooks/useDeviceSettings'
 import MaterialMenu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
@@ -20,7 +22,8 @@ interface SideMenuProps {
 
 const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
   const { mode, switchMode, delayTime, setDelayTime, switchStopStream, stopStream } = useTimeshift()
-  const { devicesOn, switchDeviceOn, Rotate } = useDeviceSettings(videoDevices)
+  const { devicesOn, switchDeviceOn, Rotate, gridOn, switchGridOn } =
+    useDeviceSettings(videoDevices)
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -145,6 +148,31 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
             onRefresh?.()
           }}
         />
+      </div>
+      <div style={{ width: '40px' }}>
+        {gridOn ? (
+          <GridOnIcon
+            sx={{ fontSize: 40 }}
+            style={{
+              color: '#e0e0e0',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              switchGridOn()
+            }}
+          />
+        ) : (
+          <GridOffIcon
+            sx={{ fontSize: 40 }}
+            style={{
+              color: '#e0e0e0',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              switchGridOn()
+            }}
+          />
+        )}
       </div>
     </div>
   )

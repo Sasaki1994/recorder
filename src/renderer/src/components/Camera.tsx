@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { Rnd } from 'react-rnd'
 import { useInterval } from 'react-use'
+import { drawGrid } from '../utils/drawGrid'
 
 interface CameraProps {
   videoStream?: MediaStream | null
@@ -16,6 +17,7 @@ interface CameraProps {
   stopStream?: boolean
   focus?: boolean
   rotateDeg?: number
+  gridOn?: boolean
 }
 
 const Camera: React.FC<CameraProps> = ({
@@ -26,7 +28,8 @@ const Camera: React.FC<CameraProps> = ({
   delayTime,
   stopStream,
   focus,
-  rotateDeg
+  rotateDeg,
+  gridOn
 }) => {
   const [focusOn, setFocusOn] = React.useState(false)
   const captureRef = useRef<HTMLVideoElement>(null)
@@ -83,6 +86,10 @@ const Camera: React.FC<CameraProps> = ({
         const delayedCtx = delayedCanvasRef.current.getContext('2d')
         if (delayedCtx) {
           delayedCtx.putImageData(dImagesRef.current[delayTime * frameRate], 0, 0)
+          // グリッド線を描画
+          if (gridOn) {
+            drawGrid(delayedCtx, delayedCanvasRef.current.width, delayedCanvasRef.current.height)
+          }
         }
       }
     }

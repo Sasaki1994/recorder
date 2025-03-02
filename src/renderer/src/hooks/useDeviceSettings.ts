@@ -6,14 +6,18 @@ interface UseDeviceSettings {
   switchDeviceOn: (index: number) => void
   rotateDegs: number[]
   Rotate: (index: number) => void
+  gridOn: boolean
+  switchGridOn: () => void
 }
 
 const deviceOnAtom = atom<boolean[]>([])
 const rotateDegsAtom = atom<number[]>([])
+const gridOnAtom = atom<boolean>(false)
 
 const useDeviceSettings = (devices: MediaDeviceInfo[]): UseDeviceSettings => {
   const [devicesOn, setDevicesOn] = useAtom(deviceOnAtom)
   const [rotateDegs, setRotateDegs] = useAtom(rotateDegsAtom)
+  const [gridOn, setGridOn] = useAtom(gridOnAtom)
 
   useEffect(() => {
     // 元々のdevicesOnの値を保ちつつ、devicesの長さだけtrueを追加
@@ -52,7 +56,11 @@ const useDeviceSettings = (devices: MediaDeviceInfo[]): UseDeviceSettings => {
     })
   }
 
-  return { devicesOn, switchDeviceOn, rotateDegs, Rotate }
+  const switchGridOn = (): void => {
+    setGridOn((prev) => !prev)
+  }
+
+  return { devicesOn, switchDeviceOn, rotateDegs, Rotate, gridOn, switchGridOn }
 }
 
 export default useDeviceSettings
