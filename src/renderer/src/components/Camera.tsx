@@ -159,10 +159,10 @@ const Camera: React.FC<CameraProps> = ({
             position: 'absolute',
             top: 14,
             right: 24,
-            color: 'black',
+            color: 'white',
             cursor: 'pointer'
           }}
-          onClick={() => {
+          onMouseDown={() => {
             setZoomdownProps({
               x: rndRef.current?.getSelfElement()?.getBoundingClientRect().left ?? 0,
               y: rndRef.current?.getSelfElement()?.getBoundingClientRect().top ?? 0,
@@ -186,7 +186,7 @@ const Camera: React.FC<CameraProps> = ({
             position: 'absolute',
             top: 14,
             right: 24,
-            color: 'black',
+            color: 'white',
             cursor: 'pointer'
           }}
           onClick={() => {
