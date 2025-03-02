@@ -17,7 +17,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
     newZIndexes[index] = Math.max(...zIndexes) + 1
     setZindexes(newZIndexes)
   }
-  const { mode, delayTime, stopStream } = useTimeshift()
+  const { mode, delayTime, stopStream, slowMode } = useTimeshift()
 
   const [videoStreams, setVideoStreams] = useState<(MediaStream | null)[]>([])
   const { devicesOn, rotateDegs, gridOn } = useDeviceSettings(videoDevices)
@@ -90,6 +90,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
           initialProps={initialFrameRefs.current[i]}
           delayTime={mode == 'preview' ? 0 : delayTime}
           stopStream={stopStream}
+          slowMode={slowMode}
           rotateDeg={rotateDegs[i]}
           gridOn={gridOn}
           canvasSize={{ width: 1280, height: 720 - menuHeight }}

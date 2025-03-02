@@ -15,6 +15,7 @@ interface CameraProps {
   onDragStart?: () => void
   delayTime?: number
   stopStream?: boolean
+  slowMode?: boolean
   focus?: boolean
   rotateDeg?: number
   gridOn?: boolean
@@ -31,6 +32,7 @@ const Camera: React.FC<CameraProps> = ({
   onDragStart,
   delayTime,
   stopStream,
+  slowMode,
   focus,
   rotateDeg,
   gridOn,
@@ -46,6 +48,7 @@ const Camera: React.FC<CameraProps> = ({
   const rndRef = useRef<Rnd>(null)
   const recordingTime = 60 // seconds
   const frameRate = 10 // fps
+  const slowFrameRate = 2 // fps
   const savedImageCount = recordingTime * frameRate + 5 // 5フレームのバッファ
 
   useEffect(() => {
@@ -58,49 +61,52 @@ const Camera: React.FC<CameraProps> = ({
     setFocusOn(!!focus)
   }, [focus])
 
-  useInterval(() => {
-    if (captureRef.current && canvasRef.current) {
-      canvasRef.current.width = captureRef.current.videoWidth
-      canvasRef.current.height = captureRef.current.videoHeight
-      const ctx = canvasRef.current.getContext('2d')
-      if (ctx) {
-        if (rotateDeg) {
-          ctx.translate(canvasRef.current.width / 2, canvasRef.current.height / 2)
-          ctx.rotate((rotateDeg * Math.PI) / 180)
-          ctx.translate(-canvasRef.current.width / 2, -canvasRef.current.height / 2)
+  useInterval(
+    () => {
+      if (captureRef.current && canvasRef.current) {
+        canvasRef.current.width = captureRef.current.videoWidth
+        canvasRef.current.height = captureRef.current.videoHeight
+        const ctx = canvasRef.current.getContext('2d')
+        if (ctx) {
+          if (rotateDeg) {
+            ctx.translate(canvasRef.current.width / 2, canvasRef.current.height / 2)
+            ctx.rotate((rotateDeg * Math.PI) / 180)
+            ctx.translate(-canvasRef.current.width / 2, -canvasRef.current.height / 2)
+          }
+          ctx.drawImage(captureRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height)
+          // 先頭フレームとして追加
+          if (!stopStream) {
+            dImagesRef.current = [
+              ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height),
+              ...dImagesRef.current
+            ]
+          }
         }
-        ctx.drawImage(captureRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height)
-        // 先頭フレームとして追加
-        if (!stopStream) {
-          dImagesRef.current = [
-            ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height),
-            ...dImagesRef.current
-          ]
+        if (!stopStream && dImagesRef.current.length > savedImageCount) {
+          dImagesRef.current.pop()
         }
-      }
-      if (!stopStream && dImagesRef.current.length > savedImageCount) {
-        dImagesRef.current.pop()
-      }
 
-      // delaytime前の画像を表示
-      if (
-        delayedCanvasRef.current &&
-        delayTime !== undefined &&
-        dImagesRef.current.length > delayTime * frameRate
-      ) {
-        delayedCanvasRef.current.width = captureRef.current.videoWidth
-        delayedCanvasRef.current.height = captureRef.current.videoHeight
-        const delayedCtx = delayedCanvasRef.current.getContext('2d')
-        if (delayedCtx) {
-          delayedCtx.putImageData(dImagesRef.current[delayTime * frameRate], 0, 0)
-          // グリッド線を描画
-          if (gridOn) {
-            drawGrid(delayedCtx, delayedCanvasRef.current.width, delayedCanvasRef.current.height)
+        // delaytime前の画像を表示
+        if (
+          delayedCanvasRef.current &&
+          delayTime !== undefined &&
+          dImagesRef.current.length > delayTime * frameRate
+        ) {
+          delayedCanvasRef.current.width = captureRef.current.videoWidth
+          delayedCanvasRef.current.height = captureRef.current.videoHeight
+          const delayedCtx = delayedCanvasRef.current.getContext('2d')
+          if (delayedCtx) {
+            delayedCtx.putImageData(dImagesRef.current[delayTime * frameRate], 0, 0)
+            // グリッド線を描画
+            if (gridOn) {
+              drawGrid(delayedCtx, delayedCanvasRef.current.width, delayedCanvasRef.current.height)
+            }
           }
         }
       }
-    }
-  }, 1000 / frameRate)
+    },
+    1000 / (slowMode && delayTime && delayTime > 0 ? slowFrameRate : frameRate)
+  )
 
   useEffect(() => {
     if (rndRef.current && rotateDeg) {

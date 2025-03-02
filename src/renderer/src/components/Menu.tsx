@@ -3,6 +3,7 @@ import { Property } from 'csstype'
 import Slider from '@mui/material/Slider'
 import useTimeshift from '../hooks/useTimeshift'
 import { PlayCircle, PauseCircle } from '@mui/icons-material'
+import SpeedIcon from '@mui/icons-material/Speed'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import GridOffIcon from '@mui/icons-material/GridOff'
@@ -21,7 +22,16 @@ interface SideMenuProps {
 }
 
 const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
-  const { mode, switchMode, delayTime, setDelayTime, switchStopStream, stopStream } = useTimeshift()
+  const {
+    mode,
+    switchMode,
+    delayTime,
+    setDelayTime,
+    switchStopStream,
+    stopStream,
+    slowMode,
+    switchSlowMode
+  } = useTimeshift()
   const { devicesOn, switchDeviceOn, Rotate, gridOn, switchGridOn } =
     useDeviceSettings(videoDevices)
 
@@ -101,6 +111,59 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
         )}
       </div>
       <div style={{ width: '40px' }}>
+        {slowMode ? (
+          <SpeedIcon
+            sx={{ fontSize: 40 }}
+            style={{
+              display: mode === 'preview' ? 'none' : '',
+              cursor: 'pointer'
+            }}
+            color="primary"
+            onClick={() => {
+              switchSlowMode()
+            }}
+          />
+        ) : (
+          <SpeedIcon
+            sx={{ fontSize: 40 }}
+            style={{
+              display: mode === 'preview' ? 'none' : '',
+              color: '#e0e0e0',
+              cursor: 'pointer'
+            }}
+            color="primary"
+            onClick={() => {
+              switchSlowMode()
+            }}
+          />
+        )}
+      </div>
+      <div style={{ width: '40px' }}>
+        {gridOn ? (
+          <GridOnIcon
+            sx={{ fontSize: 40 }}
+            style={{
+              color: '#e0e0e0',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              switchGridOn()
+            }}
+          />
+        ) : (
+          <GridOffIcon
+            sx={{ fontSize: 40 }}
+            style={{
+              color: '#e0e0e0',
+              cursor: 'pointer'
+            }}
+            onClick={() => {
+              switchGridOn()
+            }}
+          />
+        )}
+      </div>
+      <div style={{ width: '40px' }}>
         <div aria-haspopup="true" aria-expanded={open ? 'true' : undefined} onClick={handleClick}>
           <ListIcon sx={{ fontSize: 40, color: '#e0e0e0', cursor: 'pointer' }} />
         </div>
@@ -148,31 +211,6 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
             onRefresh?.()
           }}
         />
-      </div>
-      <div style={{ width: '40px' }}>
-        {gridOn ? (
-          <GridOnIcon
-            sx={{ fontSize: 40 }}
-            style={{
-              color: '#e0e0e0',
-              cursor: 'pointer'
-            }}
-            onClick={() => {
-              switchGridOn()
-            }}
-          />
-        ) : (
-          <GridOffIcon
-            sx={{ fontSize: 40 }}
-            style={{
-              color: '#e0e0e0',
-              cursor: 'pointer'
-            }}
-            onClick={() => {
-              switchGridOn()
-            }}
-          />
-        )}
       </div>
     </div>
   )
