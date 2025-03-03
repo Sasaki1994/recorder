@@ -1,7 +1,7 @@
 {
-  "name": "4d-recorder",
+  "name": "live-playback",
   "version": "0.0.0",
-  "description": "Multi Angle, time synced video recorder",
+  "description": "live playback application from multi angle cameras",
   "main": "./out/main/index.js",
   "author": "s-joe.com",
   "homepage": "",

@@ -11,7 +11,7 @@ const config = {
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
-    title: '4D Recorder',
+    title: 'Live Playback',
     width: config.mainWindow.width,
     height: config.mainWindow.height,
     show: false,
