@@ -11,7 +11,10 @@ interface CameraCanvasProps {
 const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight }) => {
   const [zIndexes, setZindexes] = useState<number[]>(Array(30).fill(0)) // 初期値が必要なので、十分に大きい長さで0埋め
   const initialFrameRefs = React.useRef<Frame[]>([])
-  const canvasSize = { width: ((720 - menuHeight) * 16) / 9, height: 720 - menuHeight }
+  const canvasSize = {
+    width: ((window.innerHeight - menuHeight) * 16) / 9,
+    height: window.innerHeight - menuHeight
+  }
   const takeTop = (index: number): void => {
     const newZIndexes = [...zIndexes]
     newZIndexes[index] = Math.max(...zIndexes) + 1
@@ -33,8 +36,8 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
           video: {
             deviceId: device.deviceId,
             frameRate: { ideal: 10 },
-            width: 1280,
-            height: 720
+            width: window.innerWidth,
+            height: window.innerHeight
           }
         })
       })
@@ -93,7 +96,7 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
           slowMode={slowMode}
           rotateDeg={rotateDegs[i]}
           gridOn={gridOn}
-          canvasSize={{ width: 1280, height: 720 - menuHeight }}
+          canvasSize={{ width: window.innerWidth, height: window.innerHeight - menuHeight }}
         />
       ))}
     </div>

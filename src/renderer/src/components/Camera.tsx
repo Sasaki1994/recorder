@@ -167,7 +167,7 @@ const Camera: React.FC<CameraProps> = ({
         <ZoomOutMapIcon
           style={{
             position: 'absolute',
-            top: 14,
+            bottom: 14,
             right: 24,
             color: 'white',
             cursor: 'pointer'
@@ -187,8 +187,8 @@ const Camera: React.FC<CameraProps> = ({
                 y: 0
               })
               rndRef.current.updateSize({
-                width: canvasSize?.width ?? 1280,
-                height: canvasSize?.height ?? 720
+                width: canvasSize?.width ?? window.innerWidth,
+                height: canvasSize?.height ?? window.innerHeight
               })
             }
           }}

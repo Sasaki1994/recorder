@@ -2,20 +2,12 @@ import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 
-const config = {
-  mainWindow: {
-    width: 1280,
-    height: 720
-  }
-}
-
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
     title: 'Live Playback',
-    width: config.mainWindow.width,
-    height: config.mainWindow.height,
-    show: false,
-    autoHideMenuBar: true,
+    kiosk: true,
+    fullscreen: true,
+    frame: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
