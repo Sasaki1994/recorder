@@ -45,13 +45,23 @@ const Camera: React.FC<CameraProps> = ({
   const [zoomdownPrpos, setZoomdownProps] = useState({ x: 0, y: 0, width: 0, height: 0 })
   const captureRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const dImagesRef = useRef<ImageData[]>([])
+  const dImagesRef = useRef<string[]>([])
   const delayedCanvasRef = useRef<HTMLCanvasElement>(null)
   const rndRef = useRef<Rnd>(null)
   const recordingTime = 60 // seconds
   const frameRate = 10 // fps
   const slowFrameRate = 2 // fps
   const savedImageCount = recordingTime * frameRate + 5 // 5フレームのバッファ
+  const img = new Image()
+  useEffect(() => {
+    img.onload = (): void => {
+      const delayedCtx = delayedCanvasRef.current!.getContext('2d')
+      if (delayedCtx) {
+        delayedCtx.drawImage(img, 0, 0)
+        img.src = dImagesRef.current[0]
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (videoStream && captureRef.current) {
@@ -78,10 +88,8 @@ const Camera: React.FC<CameraProps> = ({
           ctx.drawImage(captureRef.current, 0, 0, canvasRef.current.width, canvasRef.current.height)
           // 先頭フレームとして追加
           if (!stopStream) {
-            dImagesRef.current = [
-              ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height),
-              ...dImagesRef.current
-            ]
+            const url = canvasRef.current.toDataURL('image/jpeg', 0.85)
+            dImagesRef.current = [url, ...dImagesRef.current]
           }
         }
         if (!stopStream && dImagesRef.current.length > savedImageCount) {
@@ -98,7 +106,8 @@ const Camera: React.FC<CameraProps> = ({
           delayedCanvasRef.current.height = captureRef.current.videoHeight
           const delayedCtx = delayedCanvasRef.current.getContext('2d')
           if (delayedCtx) {
-            delayedCtx.putImageData(dImagesRef.current[delayTime * frameRate], 0, 0)
+            delayedCtx.drawImage(img, 0, 0)
+            img.src = dImagesRef.current[delayTime * frameRate]
             // グリッド線を描画
             if (gridOn) {
               drawGrid(delayedCtx, delayedCanvasRef.current.width, delayedCanvasRef.current.height)
@@ -138,7 +147,7 @@ const Camera: React.FC<CameraProps> = ({
         setFocusOn(false)
       }}
       style={{
-        backgroundColor: 'rgb(116, 116, 116)',
+        backgroundColor: 'rgb(15, 15, 15)',
         display: videoStream ? 'flex' : 'none',
         alignItems: 'center',
         justifyContent: 'center',
@@ -164,21 +173,23 @@ const Camera: React.FC<CameraProps> = ({
           }}
           onMouseEnter={() => {
             onDragStart?.()
-            setZoomdownProps({
-              x: rndRef.current?.getSelfElement()?.getBoundingClientRect().left ?? 0,
-              y: rndRef.current?.getSelfElement()?.getBoundingClientRect().top ?? 0,
-              width: rndRef.current?.getSelfElement()?.clientWidth ?? 0,
-              height: rndRef.current?.getSelfElement()?.clientHeight ?? 0
-            })
-            rndRef.current?.updateSize({
-              width: canvasSize?.width ?? 1280,
-              height: canvasSize?.height ?? 720
-            })
-            rndRef.current?.updatePosition({
-              x: 0,
-              y: 0
-            })
-            setZoomUp(true)
+            if (rndRef.current) {
+              setZoomUp(true)
+              setZoomdownProps({
+                x: rndRef.current?.getSelfElement()?.getBoundingClientRect().left ?? 0,
+                y: rndRef.current?.getSelfElement()?.getBoundingClientRect().top ?? 0,
+                width: rndRef.current?.getSelfElement()?.clientWidth ?? 0,
+                height: rndRef.current?.getSelfElement()?.clientHeight ?? 0
+              })
+              rndRef.current.updatePosition({
+                x: 0,
+                y: 0
+              })
+              rndRef.current.updateSize({
+                width: canvasSize?.width ?? 1280,
+                height: canvasSize?.height ?? 720
+              })
+            }
           }}
         />
       ) : (
@@ -192,15 +203,17 @@ const Camera: React.FC<CameraProps> = ({
           }}
           onMouseEnter={() => {
             onDragStart?.()
-            rndRef.current?.updateSize({
-              width: zoomdownPrpos.width,
-              height: zoomdownPrpos.height
-            })
-            rndRef.current?.updatePosition({
-              x: zoomdownPrpos.x,
-              y: zoomdownPrpos.y
-            })
-            setZoomUp(false)
+            if (rndRef.current) {
+              setZoomUp(false)
+              rndRef.current.updateSize({
+                width: zoomdownPrpos.width,
+                height: zoomdownPrpos.height
+              })
+              rndRef.current.updatePosition({
+                x: zoomdownPrpos.x,
+                y: zoomdownPrpos.y
+              })
+            }
           }}
         />
       )}
