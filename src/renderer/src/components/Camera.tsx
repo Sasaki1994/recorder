@@ -146,6 +146,7 @@ const Camera: React.FC<CameraProps> = ({
       onResizeStop={() => {
         setFocusOn(false)
       }}
+      enableResizing={!zoomUp}
       style={{
         backgroundColor: 'rgb(15, 15, 15)',
         display: videoStream ? 'flex' : 'none',
