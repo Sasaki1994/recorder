@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Property } from 'csstype'
 import Slider from '@mui/material/Slider'
 import useTimeshift from '../hooks/useTimeshift'
@@ -7,6 +7,7 @@ import SpeedIcon from '@mui/icons-material/Speed'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import GridOnIcon from '@mui/icons-material/GridOn'
 import GridOffIcon from '@mui/icons-material/GridOff'
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import useDeviceSettings from '../hooks/useDeviceSettings'
 import MaterialMenu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
@@ -14,6 +15,8 @@ import Switch from '@mui/material/Switch'
 import Rotate90DegreesCwIcon from '@mui/icons-material/Rotate90DegreesCw'
 
 import ListIcon from '@mui/icons-material/List'
+import useProcess from '@renderer/hooks/useProcess'
+import ShutdownModal from './ShutdownModal'
 
 interface SideMenuProps {
   height: Property.Height<string | number> | undefined
@@ -34,8 +37,10 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
   } = useTimeshift()
   const { devicesOn, switchDeviceOn, Rotate, gridOn, switchGridOn } =
     useDeviceSettings(videoDevices)
+  const { shutdown } = useProcess()
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+  const [openShutdownModal, setOpenShutdownModal] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget)
@@ -60,6 +65,23 @@ const Menu: React.FC<SideMenuProps> = ({ height, videoDevices, onRefresh }) => {
         borderTop: '3px solid #2c2c2e'
       }}
     >
+      <div style={{ width: '40px', marginRight: '120px' }}>
+        <PowerSettingsNewIcon
+          sx={{ fontSize: 40 }}
+          style={{
+            color: '#e0e0e0',
+            cursor: 'pointer'
+          }}
+          onClick={() => {
+            setOpenShutdownModal(true)
+          }}
+        />
+        <ShutdownModal
+          show={openShutdownModal}
+          onHide={() => setOpenShutdownModal(false)}
+          onShutdown={shutdown}
+        />
+      </div>
       <Slider
         style={{
           width: '60vw'
