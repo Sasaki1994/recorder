@@ -50,7 +50,7 @@ const Camera: React.FC<CameraProps> = ({
   const rndRef = useRef<Rnd>(null)
   const recordingTime = 60 // seconds
   const frameRate = 10 // fps
-  const slowFrameRate = 2 // fps
+  const slowRate = 5
   const savedImageCount = recordingTime * frameRate + 5 // 5フレームのバッファ
   const img = new Image()
   useEffect(() => {
@@ -116,7 +116,7 @@ const Camera: React.FC<CameraProps> = ({
         }
       }
     },
-    1000 / (slowMode && delayTime && delayTime > 0 ? slowFrameRate : frameRate)
+    (1000 / frameRate) * (slowMode && delayTime && delayTime > 0 ? slowRate : 1)
   )
 
   useEffect(() => {

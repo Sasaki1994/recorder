@@ -35,9 +35,9 @@ const CameraCanvas: React.FC<CameraCanvasProps> = ({ videoDevices, menuHeight })
           audio: false,
           video: {
             deviceId: device.deviceId,
-            frameRate: { ideal: 10 },
-            width: window.innerWidth,
-            height: window.innerHeight
+            frameRate: 10,
+            width: 640,
+            height: 360
           }
         })
       })
